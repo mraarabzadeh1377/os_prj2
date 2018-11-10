@@ -101,7 +101,7 @@ int sys_invoked_systemcall(void)
   return 1;
 }
 
-int sys_sort_systemcall
+int sys_sort_systemcall(void)
 {
   int pid;
   if (argint(0, &pid) < 0)
@@ -110,7 +110,7 @@ int sys_sort_systemcall
   return 1;
 }
 
-int sys_get_count
+int sys_get_count(void)
 {
   int pid;
   int sysnum;
@@ -118,11 +118,12 @@ int sys_get_count
     return -1;
   if (argint(1, &sysnum) < 0)
     return -1;
-  invoked_systemcall(pid,sysnum);
+  get_count(pid,sysnum);
   return 1;
 }
 
-int sys_log_systemcall
+int sys_log_systemcall(void)
 {
-  return log_systemcall();
+  log_systemcall();
+  return 1;
 }

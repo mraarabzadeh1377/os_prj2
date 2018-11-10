@@ -188,11 +188,11 @@ char *give_systemcall_name(int num)
   case 23:
     return "invoked_systemcall\0";
   case 24:
-    return "";
+    return "sort_systemcall\0";
   case 25:
-    return "";
+    return "get_count\0";
   case 26:
-    return "";
+    return "log_systemcall\0";
     break;
   }
   return "";
