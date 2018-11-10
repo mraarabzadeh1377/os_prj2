@@ -23,14 +23,11 @@ int main(int argc, char *argv[])
     fd = open("result.txt", O_CREATE | O_WRONLY);
     if (!fork())
     {
-        printf(1, "%d ",inc_num(2)) ;
-        while(1)
+        printf(1, "%d ", inc_num(2));
+        while (1)
         {
-
-
         }
     }
-    printf(1, "pid is : %d \n", getpid());
 
     for (j = 0; j < 5; j++)
         printf(fd, "%d ", numArr[j]);
