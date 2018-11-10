@@ -22,3 +22,6 @@
 #define SYS_close  21
 #define SYS_inc_num 22
 #define SYS_invoked_systemcall 23
+#define SYS_sort_systemcall 24
+#define	SYS_get_count 25
+#define	SYS_log_systemcall 26

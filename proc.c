@@ -543,6 +543,14 @@ void procdump(void)
     cprintf("\n");
   }
 }
+
+//our systemcall
+
+void print_systemcall(struct proc *p)
+{
+
+}
+
 int inc_num(int a)
 {
   return a + 1;
@@ -574,3 +582,35 @@ void invoked_systemcall(int pid)
     }
   }
 }
+
+void sort_systemcall(int pid)
+{
+  invoked_systemcall(pid);
+}
+
+void get_count(int pid,int sysnum)
+{
+  struct proc *p;
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    if (p->pid == pid)
+      break;
+  cprintf("proccess id is:%d  systemcall number is:%d  number of use is:%d \n", p->pid, sysnum, 
+                      p->systemcalls[sysnum]->number_of_call);
+}
+
+void log_systemcall(void)
+{
+  struct proc *p;
+
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+
+    if (p->state != UNUSED && p->state!=EMBRYO)
+
+      print_systemcall(p);
+}
+//should be complete by hosein
+
+// void print_systemcalls(struct proc *p)
+// {
+
+// }

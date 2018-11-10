@@ -25,6 +25,9 @@ int sleep(int);
 int uptime(void);
 int inc_num(int);
 void invoked_systemcall(int);
+void sort_sytemcall(int);
+void get_count(int ,int);
+void log_systemcall(void);
 // ulib.c
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);
