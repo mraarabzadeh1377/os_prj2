@@ -7,12 +7,18 @@
 #include "x86.h"
 #include "syscall.h"
 #include "date.h"
+// #include "user.h"
 
 // User code makes a system call with INT T_SYSCALL.
 // System call number in %eax.
 // Arguments on the stack, from the user call to the C
 // library system call function. The saved user %esp points
 // to a saved program counter, and then the first argument.
+#define INT "int"
+#define FD "fd"
+#define CHARS "char*"
+#define INTS "int*"
+#define SHORT "short"
 
 // Fetch the int at addr from the current process.
 int fetchint(uint addr, int *ip)
@@ -138,126 +144,153 @@ static int (*syscalls[])(void) = {
 
 };
 //create function for saving systemcall datas
-char *give_systemcall_name(int num)
+struct systemcall_info
 {
-  switch (num)
-  {
-  case 1:
-    return "fork\0";
-  case 2:
-    return "exit\0";
-  case 3:
-    return "wait\0";
-  case 4:
-    return "pipe\0";
-  case 5:
-    return "read\0";
-  case 6:
-    return "kill\0";
-  case 7:
-    return "exec\0";
-  case 8:
-    return "fstat\0";
-  case 9:
-    return "chdir\0";
-  case 10:
-    return "dup\0";
-  case 11:
-    return "getpid\0";
-  case 12:
-    return "sbrk\0";
-  case 13:
-    return "sleep\0";
-  case 14:
-    return "uptime\0";
-  case 15:
-    return "open\0";
-  case 16:
-    return "write\0";
-  case 17:
-    return "mknode\0";
-  case 18:
-    return "unlink\0";
-  case 19:
-    return "link\0";
-  case 20:
-    return "mkdir\0";
-  case 21:
-    return "close\0";
-  case 22:
-    return "inc_num\0";
-  case 23:
-    return "invoked_systemcall\0";
-  case 24:
-    return "sort_systemcall\0";
-  case 25:
-    return "get_count\0";
-  case 26:
-    return "log_systemcall\0";
-    break;
-  }
-  return "";
-}
+  char *arg_type[2];
+  int number_of_parameter;
+  char *name;
+};
 
-int give_systemcall_parameters_number(int num)
+void give_systemcall_info(int num, struct systemcall_base_inf *systemcall)
 {
   switch (num)
   {
   case 1:
-    return 1;
+    systemcall->name = "fork\0";
+    systemcall->parameter_number = 0;
+    return;
   case 2:
-    return 1;
+    systemcall->name = "exit\0";
+    systemcall->parameter_number = 0;
+    return;
   case 3:
-    return 1;
+    systemcall->name = "wait\0";
+    systemcall->parameter_number = 0;
+    return;
   case 4:
-    return 1;
+    systemcall->name = "pipe\0";
+    systemcall->parameter_number = 1;
+    systemcall->arg_type[0] = INTS;
+    return;
   case 5:
-    return 1;
+    systemcall->name = "read\0";
+    systemcall->parameter_number = 3;
+    systemcall->arg_type[0] = FD;
+    systemcall->arg_type[1] = CHARS;
+    systemcall->arg_type[2] = INT;
+    return;
   case 6:
-    return 1;
+    systemcall->name = "kill\0";
+    systemcall->parameter_number = 1;
+    systemcall->arg_type[0] = INT;
+    return;
   case 7:
-    return 1;
+    systemcall->name = "exec\0";
+    systemcall->parameter_number = 2;
+    systemcall->arg_type[0] = CHARS;
+    systemcall->arg_type[1] = CHARS;
+    return;
   case 8:
-    return 1;
+    systemcall->name = "fstat\0"; // todo :2 ta arg dare
+    systemcall->parameter_number = 1;
+    systemcall->arg_type[0] = FD;
+    return;
   case 9:
-    return 1;
+    systemcall->name = "chdir\0";
+    systemcall->parameter_number = 1;
+    systemcall->arg_type[0] = CHARS;
+    return;
   case 10:
-    return 1;
+    systemcall->name = "dup\0";
+    systemcall->parameter_number = 1;
+    systemcall->arg_type[0] = FD;
+    return;
   case 11:
-    return 1;
+    systemcall->name = "getpid\0";
+    systemcall->parameter_number = 0;
+    return;
   case 12:
-    return 1;
+    systemcall->name = "sbrk\0";
+    systemcall->parameter_number = 1;
+    systemcall->arg_type[0] = INT;
+    return;
   case 13:
-    return 1;
+    systemcall->name = "sleep\0";
+    systemcall->parameter_number = 1;
+    systemcall->arg_type[0] = INT;
+    return;
   case 14:
-    return 1;
+    systemcall->name = "uptime\0";
+    systemcall->parameter_number = 0;
+    return;
   case 15:
-    return 1;
+    systemcall->name = "open\0";
+    systemcall->parameter_number = 2;
+    systemcall->arg_type[0] = CHARS;
+    systemcall->arg_type[1] = INT;
+    return;
   case 16:
-    return 1;
+    systemcall->name = "write\0";
+    systemcall->parameter_number = 3;
+    systemcall->arg_type[0] = FD;
+    systemcall->arg_type[1] = CHARS;
+    systemcall->arg_type[2] = INT;
+    return;
   case 17:
-    return 1;
+    systemcall->name = "mknode\0"; // todo : in 2 ta arg dare fekr konam
+    systemcall->parameter_number = 3;
+    systemcall->arg_type[0] = CHARS;
+    systemcall->arg_type[1] = SHORT;
+    systemcall->arg_type[2] = SHORT;
+    return;
   case 18:
-    return 1;
+    systemcall->name = "unlink\0";
+    systemcall->parameter_number = 1;
+    systemcall->arg_type[0] = CHARS;
+    return;
   case 19:
-    return 1;
+    systemcall->name = "link\0";
+    systemcall->parameter_number = 2;
+    systemcall->arg_type[0] = CHARS;
+    systemcall->arg_type[1] = CHARS;
+    return;
   case 20:
-    return 1;
+    systemcall->name = "mkdir\0";
+    systemcall->parameter_number = 1;
+    systemcall->arg_type[0] = CHARS;
+    return;
   case 21:
-    return 1;
+    systemcall->name = "close\0";
+    systemcall->arg_type[0] = CHARS;
+    systemcall->parameter_number = 1;
+    return;
   case 22:
-    return 1;
+    systemcall->name = "inc_num\0";
+    systemcall->parameter_number = 1;
+    systemcall->arg_type[0] = INT;
+    return;
   case 23:
-    return 1;
+    systemcall->name = "invoked_systemcall\0";
+    systemcall->parameter_number = 1;
+    systemcall->arg_type[0] = INT;
+    return;
   case 24:
-    return 1;
+    systemcall->name = "sort_systemcall\0";
+    systemcall->parameter_number = 1;
+    systemcall->arg_type[0] = INT;
+    return;
   case 25:
-    return 1;
+    systemcall->name = "get_count\0";
+    systemcall->parameter_number = 2;
+    systemcall->arg_type[0] = INT;
+    systemcall->arg_type[1] = INT;
+    return;
   case 26:
-    return 1;
-    break;
+    systemcall->name = "log_systemcall\0";
+    systemcall->parameter_number = 0;
+    return;
   }
-  return 1;
+  return;
 }
 
 void save_systemcall_data(struct proc *curproc, int systemcall_number)
@@ -268,29 +301,44 @@ void save_systemcall_data(struct proc *curproc, int systemcall_number)
   struct rtcdate *temp_time = (struct rtcdate *)kalloc();
   cmostime(temp_time);
   new_si->time = temp_time;
+  give_systemcall_info(systemcall_number, sbi);
+
+  // todo : in hanooz moonde
+  for (int i = 0; i < sbi->parameter_number; i++)
+  {
+    if (strncmp(sbi->arg_type[i], "int*", 4) || strncmp(sbi->arg_type[i], "char*", 5))
+    {
+      // todo : in bayad barresi she ke az che tabei estefade konim
+
+      // char *temp;
+      // argstr(i, &temp);
+      // new_si->arg_value[i] = temp;
+    }
+    if (strncmp(sbi->arg_type[i], "int", 3) || strncmp(sbi->arg_type[i], "short", 5) || strncmp(sbi->arg_type[i], "fd", 2))
+    {
+      int temp;
+      argint(i, &temp);
+      // *(new_si->arg_value[i]) = itoa(temp);
+    }
+  }
 
   if (!curproc->systemcalls[systemcall_number])
   {
     //initial systemcall in pcb for firsttime
     sbi->id = systemcall_number;
-    sbi->name = give_systemcall_name(systemcall_number);
     sbi->number_of_call = 0;
     sbi->instances = new_si;
-    sbi->parameter_number = give_systemcall_parameters_number(systemcall_number);
     curproc->systemcalls[systemcall_number] = sbi;
   }
   else
   {
     struct systemcall_instance *si_iterator = curproc->systemcalls[systemcall_number]->instances;
     for (int i = 0; i < curproc->systemcalls[systemcall_number]->number_of_call - 1; i++)
-    {
       si_iterator = si_iterator->next;
-    }
+
     si_iterator->next = new_si;
   }
 
-  cprintf("syscall name: %s   ", curproc->systemcalls[systemcall_number]->name);
-  cprintf("parameters %d \n", curproc->systemcalls[systemcall_number]->parameter_number);
   curproc->systemcalls[systemcall_number]
       ->number_of_call += 1;
 }

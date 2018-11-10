@@ -63,16 +63,9 @@ struct proc
   struct systemcall_base_inf *systemcalls[27]; //process systemcall history
 };
 
-struct value_and_type
-{
-  char *type;
-  char *value;
-  struct value_and_type *next;
-};
-
 struct systemcall_instance
 {
-  struct value_and_type *arg_data;
+  char *arg_value[2];
   struct rtcdate *time;
   struct systemcall_instance *next;
 };
@@ -83,6 +76,7 @@ struct systemcall_base_inf
   int parameter_number;
   char *name;
   int number_of_call;
+  char *arg_type[3];
   struct systemcall_instance *instances;
 };
 // Process memory is laid out contiguously, low addresses first:
