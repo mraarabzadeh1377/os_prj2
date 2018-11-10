@@ -24,6 +24,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int inc_num(int);
+void invoked_systemcall(int);
 // ulib.c
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);

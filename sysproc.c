@@ -89,6 +89,7 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
 int
 sys_inc_num(void)
 {
@@ -96,4 +97,14 @@ sys_inc_num(void)
   if(argint(0, &pid) < 0)
     return -1;
   return inc_num(pid);
+}
+
+int 
+sys_invoked_systemcall(void)
+{
+  int pid;
+  if(argint(0, &pid) < 0)
+    return -1;
+  invoked_systemcall(pid);
+  return 1;
 }

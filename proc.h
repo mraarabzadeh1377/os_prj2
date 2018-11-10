@@ -49,7 +49,7 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
-  struct system_call_base_inf *all_systemcall_history_data[27]; //process systemcall history
+  struct systemcall_base_inf *all_systemcall_history_data[27]; //process systemcall history
 };
 
 struct value_and_type_of_parameter_of_systemcall

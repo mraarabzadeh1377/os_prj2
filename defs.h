@@ -120,7 +120,8 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-int 		inc_num(int);
+int 			inc_num(int);
+void 			invoked_systemcall(int);
 // swtch.S
 void            swtch(struct context**, struct context*);
 

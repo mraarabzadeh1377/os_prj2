@@ -6,8 +6,6 @@
 #include "proc.h"
 #include "x86.h"
 #include "syscall.h"
-#include "lapic.c"
-//#include <string.h>
 
 // User code makes a system call with INT T_SYSCALL.
 // System call number in %eax.
@@ -106,6 +104,8 @@ extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_inc_num(void);
+extern int sys_inc_num(void);
+extern int sys_invoked_systemcall(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -130,35 +130,36 @@ static int (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_inc_num] sys_inc_num,
+[SYS_invoked_systemcall] sys_invoked_systemcall,
 };
 //create function for saving systemcall datas
 char * give_systemcall_name(int num)
 {
   switch(num)
   {
-    case 1:return "fork";
-    case 2:return "exit";
-    case 3:return "wait";
-    case 4:return "pipe";
-    case 5:return "read";
-    case 6:return "kill";
-    case 7:return "exec";
-    case 8:return "fstat";
-    case 9:return "chdir";
-    case 10:return "dup";
-    case 11: return "getpid";
-    case 12: return "sbrk";
-    case 13: return "sleep";
-    case 14: return "uptime";
-    case 15: return "open";
-    case 16: return "write";
-    case 17: return "mknode";
-    case 18: return "unlink";
-    case 19: return "link";
-    case 20: return "mkdir";
-    case 21: return "close";
-    case 22: return "inc_num";
-    case 23: return "";
+    case 1:return "fork\0";
+    case 2:return "exit\0";
+    case 3:return "wait\0";
+    case 4:return "pipe\0";
+    case 5:return "read\0";
+    case 6:return "kill\0";
+    case 7:return "exec\0";
+    case 8:return "fstat\0";
+    case 9:return "chdir\0";
+    case 10:return "dup\0";
+    case 11: return "getpid\0";
+    case 12: return "sbrk\0";
+    case 13: return "sleep\0";
+    case 14: return "uptime\0";
+    case 15: return "open\0";
+    case 16: return "write\0";
+    case 17: return "mknode\0";
+    case 18: return "unlink\0";
+    case 19: return "link\0";
+    case 20: return "mkdir\0";
+    case 21: return "close\0";
+    case 22: return "inc_num\0";
+    case 23: return "invoked_systemcall\0";
     case 24: return"";
     case 25: return"";
     case 26: return"";
@@ -167,29 +168,44 @@ char * give_systemcall_name(int num)
   return "";
 }
 
-void save_systemcall(struct proc *curproc,int systemcall_number)
+void save_systemcall_data(struct proc *curproc,int systemcall_number)
 {
+  struct systemcall_base_inf *sc;
+  sc = (struct systemcall_base_inf*)malloc(sizeof(struct systemcall_base_inf));
+
+  cprintf("pid is : %d  ", curproc->pid);
+  cprintf("syscal is : %s  ", give_systemcall_name(systemcall_number));
+
+
   if (!curproc->all_systemcall_history_data[systemcall_number])
   {
-    struct systemcall_base_inf sc;
-    sc.tmux=1;
-    sc.systemcall_id=systemcall_number;
-    //strcpy(sc.systemcall_name,give_systemcall_name(systemcall_number));
-    sc.number_of_call=0;
-    sc.this_systemcall_data=0;
-    curproc->all_systemcall_history_data[systemcall_number]=&sc;
+    cprintf("in if    ");
+    sc->tmux=1;
+    sc->systemcall_id=systemcall_number;
+    sc->systemcall_name=give_systemcall_name(systemcall_number);
+    sc->number_of_call=0;
+    sc->this_systemcall_data=0;
+    curproc->all_systemcall_history_data[systemcall_number]= sc;
   }
-  struct real_time_systemcall_data* rtnext= 
-              curproc->all_systemcall_history_data[systemcall_number]->this_systemcall_data;
-  for (int i = 0; i < curproc->all_systemcall_history_data[systemcall_number]->number_of_call; ++i)
-  {
-    rtnext=rtnext->next;
+  else{
+    cprintf("in else  ");    
   }
-  struct real_time_systemcall_data nrt;
-  cmostime(nrt.systemcall_time);
-  nrt.next=NULL;
-  rtnext=&nrt;
-  curproc->all_systemcall_history_data[systemcall_number]->number_of_call++;      
+  // struct real_time_systemcall_data* rtnext= curproc->all_systemcall_history_data[systemcall_number]->this_systemcall_data;
+  // for (int i = 0; i < curproc->all_systemcall_history_data[systemcall_number]->number_of_call; ++i)
+  // {
+  //   rtnext=rtnext->next;
+  // }
+  // struct real_time_systemcall_data nrt;
+  // struct rtcdate *rtcdate_temp=0;
+  // cmostime(rtcdate_temp);
+  // nrt.systemcall_time=rtcdate_temp;
+  // cmostime(nrt.systemcall_time);
+  // nrt.next=0;
+  // rtnext=&nrt;
+  cprintf("before %d ",curproc->all_systemcall_history_data[systemcall_number]->number_of_call);    
+  
+  curproc->all_systemcall_history_data[systemcall_number]->number_of_call += 1;    
+  cprintf("after  %d \n",curproc->all_systemcall_history_data[systemcall_number]->number_of_call);    
 }
 void
 syscall(void)
@@ -200,7 +216,11 @@ syscall(void)
   num = curproc->tf->eax;
 
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+    
     curproc->tf->eax = syscalls[num]();
+    save_systemcall_data(curproc, num);
+    // cprintf("sysnum is : %d %d %s\n", curproc->pid,curproc->all_systemcall_history_data[num]->number_of_call,give_systemcall_name(num));
+
   } else {
     cprintf("%d %s: unknown sys call %d\n",
             curproc->pid, curproc->name, num);

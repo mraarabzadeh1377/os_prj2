@@ -20,7 +20,6 @@ main(void)
   dup(0);  // stderr
 
   for(;;){
-    printf(1, "init: starting sh\nArabzadeh norozi vahedi\n");
     printf(1, "%d \n",inc_num(5));	
     pid = fork();
     if(pid < 0){
