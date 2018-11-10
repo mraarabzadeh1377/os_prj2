@@ -578,3 +578,18 @@ void invoked_systemcall(int pid)
     }
   }
 }
+
+void sort_systemcall(int pid)
+{
+
+}
+
+void get_count(int pid,int sysnum)
+{
+
+}
+
+void log_systemcall(void)
+{
+  
+}

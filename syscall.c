@@ -102,6 +102,9 @@ extern int sys_uptime(void);
 extern int sys_inc_num(void);
 extern int sys_inc_num(void);
 extern int sys_invoked_systemcall(void);
+extern int sys_sort_systemcall(void);
+extern int sys_get_count(void);
+extern int sys_log_systemcall(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork] sys_fork,
@@ -127,6 +130,11 @@ static int (*syscalls[])(void) = {
     [SYS_close] sys_close,
     [SYS_inc_num] sys_inc_num,
     [SYS_invoked_systemcall] sys_invoked_systemcall,
+
+    [SYS_sort_systemcall] sys_sort_systemcall,
+    [SYS_get_count] sys_get_count,
+    [SYS_log_systemcall] sys_log_systemcall,
+
 };
 //create function for saving systemcall datas
 char *give_systemcall_name(int num)

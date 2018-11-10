@@ -100,3 +100,29 @@ int sys_invoked_systemcall(void)
   invoked_systemcall(pid);
   return 1;
 }
+
+int sys_sort_systemcall
+{
+  int pid;
+  if (argint(0, &pid) < 0)
+    return -1;
+  sort_systemcall(pid);
+  return 1;
+}
+
+int sys_get_count
+{
+  int pid;
+  int sysnum;
+  if (argint(0, &pid) < 0)
+    return -1;
+  if (argint(1, &sysnum) < 0)
+    return -1;
+  invoked_systemcall(pid,sysnum);
+  return 1;
+}
+
+int sys_log_systemcall
+{
+  return log_systemcall();
+}

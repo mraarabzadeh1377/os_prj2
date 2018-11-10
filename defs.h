@@ -122,6 +122,10 @@ void            wakeup(void*);
 void            yield(void);
 int 			inc_num(int);
 void 			invoked_systemcall(int);
+void 			sys_sort_systemcall(int);
+void			sys_get_count(int,int);
+void 			sys_log_systemcall(void);
+
 // swtch.S
 void            swtch(struct context**, struct context*);
 
