@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "date.h"
 
 struct
 {
@@ -550,31 +551,26 @@ int inc_num(int a)
 void invoked_systemcall(int pid)
 {
   struct proc *p;
-
-  //struct value_and_type_of_parameter_of_systemcall ;
-
-  //struct real_time_systemcall_data * rts_next;
-
-  //struct systemcall_base_inf * sbi_next;
-
-  // acquire(&ptable.lock);
-
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     if (p->pid == pid)
       break;
-
-  // release(&ptable.lock);
 
   for (int i = 0; i < 27; ++i)
   {
     if (p->systemcalls[i])
     {
-      cprintf("go to if and pid:%d\n", i);
-      cprintf("%d \n", p->systemcalls[i]->number_of_call);
-    }
-    else
-    {
-      cprintf("%x ", p->systemcalls[i]);
+      cprintf("%s ", p->systemcalls[i]->name);
+      cprintf("%d ", p->systemcalls[i]->number_of_call);
+
+      struct systemcall_instance *si = p->systemcalls[i]->instances;
+
+      for (int j = 0; j < p->systemcalls[i]->number_of_call; j++)
+      {
+        // cprintf("%d ", si->time->year);
+        si = si->next;
+        // cprintf("hello ");
+      }
+      cprintf("\n");
     }
   }
 }

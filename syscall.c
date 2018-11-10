@@ -6,6 +6,7 @@
 #include "proc.h"
 #include "x86.h"
 #include "syscall.h"
+#include "date.h"
 
 // User code makes a system call with INT T_SYSCALL.
 // System call number in %eax.
@@ -192,32 +193,43 @@ char *give_systemcall_name(int num)
 
 void save_systemcall_data(struct proc *curproc, int systemcall_number)
 {
-  struct systemcall_base_inf *sc;
-  sc = (struct systemcall_base_inf *)kalloc();
+  struct systemcall_base_inf *sbi = (struct systemcall_base_inf *)kalloc();
+
+  struct systemcall_instance *new_si = (struct systemcall_instance *)kalloc();
+  struct rtcdate *temp_time = (struct rtcdate *)kalloc();
+  cmostime(temp_time);
+  new_si->time = temp_time;
+  new_si->parameter_number = 1;
+
   if (!curproc->systemcalls[systemcall_number])
   {
-    sc->id = systemcall_number;
-    sc->name = give_systemcall_name(systemcall_number);
-    sc->number_of_call = 0;
-    sc->instances = 0;
-    curproc->systemcalls[systemcall_number] = sc;
+    sbi->id = systemcall_number;
+    sbi->name = give_systemcall_name(systemcall_number);
+    sbi->number_of_call = 0;
+    sbi->instances = new_si;
+    curproc->systemcalls[systemcall_number] = sbi;
+    // cprintf(" in if");
   }
+  else
+  {
+    // cprintf(" in eles");
 
-  // struct real_time_systemcall_data* rtnext= curproc->all_systemcall_history_data[systemcall_number]->this_systemcall_data;
-  // for (int i = 0; i < curproc->all_systemcall_history_data[systemcall_number]->number_of_call; ++i)
-  // {
-  //   rtnext=rtnext->next;
-  // }
-  // struct real_time_systemcall_data nrt;
-  // struct rtcdate *rtcdate_temp=0;
-  // cmostime(rtcdate_temp);
-  // nrt.systemcall_time=rtcdate_temp;
-  // cmostime(nrt.systemcall_time);
-  // nrt.next=0;
-  // rtnext=&nrt;
+    struct systemcall_instance *si_iterator;
+    si_iterator = curproc->systemcalls[systemcall_number]->instances;
+    for (int i = 0; i < curproc->systemcalls[systemcall_number]->number_of_call; i++)
+    {
+      // cprintf(" level of depth %d ", i);
+      // cprintf(" parameter_number : %d \n", si_iterator->parameter_number);
+      si_iterator = si_iterator->next;
+    }
+    si_iterator = new_si;
+  }
+  // cprintf(" \n");
 
-  curproc->systemcalls[systemcall_number]->number_of_call += 1;
+  curproc->systemcalls[systemcall_number]
+      ->number_of_call += 1;
 }
+
 void syscall(void)
 {
   int num;
@@ -230,7 +242,6 @@ void syscall(void)
 
     curproc->tf->eax = syscalls[num]();
     save_systemcall_data(curproc, num);
-    // cprintf("sysnum is : %d %d %s\n", curproc->pid,curproc->all_systemcall_history_data[num]->number_of_call,give_systemcall_name(num));
   }
   else
   {
