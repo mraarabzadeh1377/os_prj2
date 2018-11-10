@@ -72,7 +72,6 @@ struct value_and_type
 
 struct systemcall_instance
 {
-  int parameter_number;
   struct value_and_type *arg_data;
   struct rtcdate *time;
   struct systemcall_instance *next;
@@ -81,6 +80,7 @@ struct systemcall_instance
 struct systemcall_base_inf
 {
   int id;
+  int parameter_number;
   char *name;
   int number_of_call;
   struct systemcall_instance *instances;

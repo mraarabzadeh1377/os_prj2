@@ -566,7 +566,7 @@ void invoked_systemcall(int pid)
 
       for (int j = 0; j < p->systemcalls[i]->number_of_call; j++)
       {
-        // cprintf("%d ", si->time->year);
+        cprintf("%d ", si->time->year);
         si = si->next;
         // cprintf("hello ");
       }

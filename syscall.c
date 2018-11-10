@@ -191,41 +191,98 @@ char *give_systemcall_name(int num)
   return "";
 }
 
+int give_systemcall_parameters_number(int num)
+{
+  switch (num)
+  {
+  case 1:
+    return 1;
+  case 2:
+    return 1;
+  case 3:
+    return 1;
+  case 4:
+    return 1;
+  case 5:
+    return 1;
+  case 6:
+    return 1;
+  case 7:
+    return 1;
+  case 8:
+    return 1;
+  case 9:
+    return 1;
+  case 10:
+    return 1;
+  case 11:
+    return 1;
+  case 12:
+    return 1;
+  case 13:
+    return 1;
+  case 14:
+    return 1;
+  case 15:
+    return 1;
+  case 16:
+    return 1;
+  case 17:
+    return 1;
+  case 18:
+    return 1;
+  case 19:
+    return 1;
+  case 20:
+    return 1;
+  case 21:
+    return 1;
+  case 22:
+    return 1;
+  case 23:
+    return 1;
+  case 24:
+    return 1;
+  case 25:
+    return 1;
+  case 26:
+    return 1;
+    break;
+  }
+  return 1;
+}
+
 void save_systemcall_data(struct proc *curproc, int systemcall_number)
 {
   struct systemcall_base_inf *sbi = (struct systemcall_base_inf *)kalloc();
-
+  // initial instance on systemcall
   struct systemcall_instance *new_si = (struct systemcall_instance *)kalloc();
   struct rtcdate *temp_time = (struct rtcdate *)kalloc();
   cmostime(temp_time);
   new_si->time = temp_time;
-  new_si->parameter_number = 1;
 
   if (!curproc->systemcalls[systemcall_number])
   {
+    //initial systemcall in pcb for firsttime
     sbi->id = systemcall_number;
     sbi->name = give_systemcall_name(systemcall_number);
     sbi->number_of_call = 0;
     sbi->instances = new_si;
+    sbi->parameter_number = give_systemcall_parameters_number(systemcall_number);
     curproc->systemcalls[systemcall_number] = sbi;
-    // cprintf(" in if");
   }
   else
   {
-    // cprintf(" in eles");
-
-    struct systemcall_instance *si_iterator;
-    si_iterator = curproc->systemcalls[systemcall_number]->instances;
-    for (int i = 0; i < curproc->systemcalls[systemcall_number]->number_of_call; i++)
+    struct systemcall_instance *si_iterator = curproc->systemcalls[systemcall_number]->instances;
+    for (int i = 0; i < curproc->systemcalls[systemcall_number]->number_of_call - 1; i++)
     {
-      // cprintf(" level of depth %d ", i);
-      // cprintf(" parameter_number : %d \n", si_iterator->parameter_number);
       si_iterator = si_iterator->next;
     }
-    si_iterator = new_si;
+    si_iterator->next = new_si;
   }
-  // cprintf(" \n");
 
+  cprintf("syscall name: %s   ", curproc->systemcalls[systemcall_number]->name);
+  cprintf("parameters %d \n", curproc->systemcalls[systemcall_number]->parameter_number);
   curproc->systemcalls[systemcall_number]
       ->number_of_call += 1;
 }
