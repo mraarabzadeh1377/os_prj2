@@ -19,6 +19,9 @@
 #define CHARS "char*"
 #define INTS "int*"
 #define SHORT "short"
+#define STRUCTS "struct stat*"
+#define VOIDS "void*"
+#define CHARSS "char**"
 
 // Fetch the int at addr from the current process.
 int fetchint(uint addr, int *ip)
@@ -176,7 +179,7 @@ void give_systemcall_info(int num, struct systemcall_base_inf *systemcall)
     systemcall->name = "read\0";
     systemcall->parameter_number = 3;
     systemcall->arg_type[0] = FD;
-    systemcall->arg_type[1] = CHARS;
+    systemcall->arg_type[1] = VOIDS;
     systemcall->arg_type[2] = INT;
     return;
   case 6:
@@ -188,12 +191,14 @@ void give_systemcall_info(int num, struct systemcall_base_inf *systemcall)
     systemcall->name = "exec\0";
     systemcall->parameter_number = 2;
     systemcall->arg_type[0] = CHARS;
-    systemcall->arg_type[1] = CHARS;
+    systemcall->arg_type[1] = CHARSS;
     return;
   case 8:
     systemcall->name = "fstat\0"; // todo :2 ta arg dare
     systemcall->parameter_number = 1;
     systemcall->arg_type[0] = FD;
+    systemcall->arg_type[1] = STRUCTS;
+
     return;
   case 9:
     systemcall->name = "chdir\0";
@@ -233,7 +238,7 @@ void give_systemcall_info(int num, struct systemcall_base_inf *systemcall)
     systemcall->name = "write\0";
     systemcall->parameter_number = 3;
     systemcall->arg_type[0] = FD;
-    systemcall->arg_type[1] = CHARS;
+    systemcall->arg_type[1] = VOIDS;
     systemcall->arg_type[2] = INT;
     return;
   case 17:
@@ -303,23 +308,25 @@ void save_systemcall_data(struct proc *curproc, int systemcall_number)
   new_si->time = temp_time;
   give_systemcall_info(systemcall_number, sbi);
 
-  // todo : in hanooz moonde
+  // save systemcalls arguments
   for (int i = 0; i < sbi->parameter_number; i++)
   {
-    if (strncmp(sbi->arg_type[i], "int*", 4) || strncmp(sbi->arg_type[i], "char*", 5))
-    {
-      // todo : in bayad barresi she ke az che tabei estefade konim
+    struct argumnet_value *av = (struct argumnet_value *)kalloc();
+    av->chars_val = (char *)kalloc();
+    av->pointer_val = (char **)kalloc();
 
-      // char *temp;
-      // argstr(i, &temp);
-      // new_si->arg_value[i] = temp;
-    }
-    if (strncmp(sbi->arg_type[i], "int", 3) || strncmp(sbi->arg_type[i], "short", 5) || strncmp(sbi->arg_type[i], "fd", 2))
-    {
-      int temp;
-      argint(i, &temp);
-      // *(new_si->arg_value[i]) = itoa(temp);
-    }
+    if (!strncmp(sbi->arg_type[i], STRUCTS, 12))
+      argptr(i, av->pointer_val, sizeof(struct stat *));
+
+    else if (!strncmp(sbi->arg_type[i], INTS, 4))
+      argptr(i, av->pointer_val, sizeof(int *));
+
+    if (!strncmp(sbi->arg_type[i], CHARS, 5))
+      argstr(i, &(av->chars_val));
+
+    else if (!strncmp(sbi->arg_type[i], INT, 3) || !strncmp(sbi->arg_type[i], SHORT, 5) || !strncmp(sbi->arg_type[i], FD, 2))
+      argint(i, &(av->int_val));
+    new_si->arg_value[i] = av;
   }
 
   if (!curproc->systemcalls[systemcall_number])

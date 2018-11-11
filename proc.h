@@ -63,9 +63,16 @@ struct proc
   struct systemcall_base_inf *systemcalls[27]; //process systemcall history
 };
 
+struct argumnet_value
+{
+  char *chars_val;
+  int int_val;
+  char **pointer_val;
+};
+
 struct systemcall_instance
 {
-  char *arg_value[2];
+  struct argumnet_value *arg_value[3];
   struct rtcdate *time;
   struct systemcall_instance *next;
 };
