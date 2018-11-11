@@ -125,7 +125,6 @@ void 			invoked_systemcall(int);
 void 			sort_systemcall(int);
 void			get_count(int,int);
 void 			log_systemcall(void);
-void 			print_systemcall(struct proc *);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

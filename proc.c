@@ -546,12 +546,9 @@ void procdump(void)
 
 //our systemcall
 
-void print_systemcall(struct proc *p)
-{
-}
-
 int inc_num(int a)
 {
+  cprintf(" %d ",a+1);
   return a + 1;
 }
 
@@ -610,18 +607,61 @@ void get_count(int pid, int sysnum)
   struct proc *p;
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     if (p->pid == pid)
-      break;
-  cprintf("proccess id is:%d  systemcall number is:%d  number of use is:%d \n", p->pid, sysnum,
+      goto write;
+  cprintf("pid not found\n");
+  return;
+write:
+  if (p->systemcalls[sysnum])
+  {
+    cprintf("proccess id is:%d  systemcall number is:%d  number of use is:%d \n", p->pid, sysnum,
           p->systemcalls[sysnum]->number_of_call);
+  }
+  else
+  {
+    cprintf("this systemcall not found for this process\n");
+  }
+  
 }
 
 void log_systemcall(void)
 {
   struct proc *p;
-
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    if (p->state != EMBRYO && p->state!=UNUSED && p->state != ZOMBIE)
+    {
+      for (int i = 0; i < 27; ++i)
+      {
+        if (p->systemcalls[i])
+        {
+          cprintf("id: %d \n", p->systemcalls[i]->id);
+          cprintf("name: %s ", p->systemcalls[i]->name);
+          cprintf("call num: %d \n", p->systemcalls[i]->number_of_call);
 
-    if (p->state != UNUSED && p->state != EMBRYO)
-
-      print_systemcall(p);
+          struct systemcall_instance *si = p->systemcalls[i]->instances;
+          for (int j = 0; j < p->systemcalls[i]->number_of_call; j++)
+          {
+            cprintf(" time: %d/%d/%d  %d:%d:%d \n", si->time->year, si->time->month, si->time->day, si->time->hour, si->time->minute, si->time->second);
+            for (int k = 0; k < p->systemcalls[i]->parameter_number; k++)
+            {
+              cprintf(" %s ", p->systemcalls[i]->arg_type[k]);
+              if (!strncmp(p->systemcalls[i]->arg_type[k], "int*", 4) || !strncmp(p->systemcalls[i]->arg_type[k], "struct stat*", 12))
+              {
+                cprintf(" %s ", si->arg_value[k]->pointer_val[0]);
+              }
+              else if (!strncmp(p->systemcalls[i]->arg_type[k], "int", 3) || !strncmp(p->systemcalls[i]->arg_type[k], "short", 5) || !strncmp(p->systemcalls[i]->arg_type[k], "fd", 2))
+              {
+                cprintf(" %d ", si->arg_value[k]->int_val);
+              }
+              else if (!strncmp(p->systemcalls[i]->arg_type[k], "char*", 5))
+              {
+                cprintf(" %s ", si->arg_value[k]->chars_val);
+              }
+            }
+            cprintf("\n");
+            si = si->next;
+          }
+          cprintf("\n");
+        }
+      }
+    }
 }
