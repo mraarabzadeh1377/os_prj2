@@ -584,10 +584,10 @@ pri:
           {
             cprintf(" %d ", si->arg_value[k]->int_val);
           }
-          else if (!strncmp(p->systemcalls[i]->arg_type[k], "char*", 5))
-          {
-            cprintf(" %s ", si->arg_value[k]->chars_val);
-          }
+          // else if (!strncmp(p->systemcalls[i]->arg_type[k], "char*", 5))
+          // {
+          //   cprintf(" %s ", si->arg_value[k]->chars_val);
+          // }
         }
         cprintf("\n");
         si = si->next;
@@ -627,8 +627,9 @@ void log_systemcall(void)
 {
   struct proc *p;
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if (p->state != EMBRYO && p->state!=UNUSED && p->state != ZOMBIE)
+    if (p->state == RUNNING || p->state == SLEEPING)
     {
+      cprintf("process name:%s\n",p->name);
       for (int i = 0; i < 27; ++i)
       {
         if (p->systemcalls[i])
@@ -652,10 +653,10 @@ void log_systemcall(void)
               {
                 cprintf(" %d ", si->arg_value[k]->int_val);
               }
-              else if (!strncmp(p->systemcalls[i]->arg_type[k], "char*", 5))
-              {
-                cprintf(" %s ", si->arg_value[k]->chars_val);
-              }
+              // else if (!strncmp(p->systemcalls[i]->arg_type[k], "char*", 5))
+              // {
+              //   cprintf(" %s ", si->arg_value[k]->chars_val[0]);
+              // }
             }
             cprintf("\n");
             si = si->next;

@@ -5,7 +5,6 @@
 
 int main(int argc, char *argv[])
 {
-    int pid = atoi(argv[1]);
-    invoked_systemcall(pid);
+    log_systemcall();
     exit();
 }
