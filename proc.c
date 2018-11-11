@@ -575,19 +575,19 @@ pri:
         cprintf(" time: %d/%d/%d  %d:%d:%d \n", si->time->year, si->time->month, si->time->day, si->time->hour, si->time->minute, si->time->second);
         for (int k = 0; k < p->systemcalls[i]->parameter_number; k++)
         {
-          cprintf(" %s ", p->systemcalls[i]->arg_type[k]);
-          if (!strncmp(p->systemcalls[i]->arg_type[k], "int*", 4) || !strncmp(p->systemcalls[i]->arg_type[k], "struct stat*", 12))
-          {
-            cprintf(" %s ", si->arg_value[k]->pointer_val[0]);
-          }
-          else if (!strncmp(p->systemcalls[i]->arg_type[k], "int", 3) || !strncmp(p->systemcalls[i]->arg_type[k], "short", 5) || !strncmp(p->systemcalls[i]->arg_type[k], "fd", 2))
-          {
-            cprintf(" %d ", si->arg_value[k]->int_val);
-          }
-          // else if (!strncmp(p->systemcalls[i]->arg_type[k], "char*", 5))
-          // {
-          //   cprintf(" %s ", si->arg_value[k]->chars_val);
-          // }
+           cprintf(" %s ", p->systemcalls[i]->arg_type[k]);
+              if (!strncmp(p->systemcalls[i]->arg_type[k], "int*", 4) || !strncmp(p->systemcalls[i]->arg_type[k], "struct stat*", 12) || !strncmp(p->systemcalls[i]->arg_type[k], "char**", 6))
+              {
+                //cprintf(" %s ", si->arg_value[k]->pointer_val[0]);
+              }
+              else if (!strncmp(p->systemcalls[i]->arg_type[k], "int", 3) || !strncmp(p->systemcalls[i]->arg_type[k], "short", 5) || !strncmp(p->systemcalls[i]->arg_type[k], "fd", 2))
+              {
+                cprintf(" %d ", si->arg_value[k]->int_val);
+              }
+              else if (!strncmp(p->systemcalls[i]->arg_type[k], "char*", 5))
+              {
+                cprintf(" %s ", si->arg_value[k]->chars_val);
+              }
         }
         cprintf("\n");
         si = si->next;
@@ -645,18 +645,18 @@ void log_systemcall(void)
             for (int k = 0; k < p->systemcalls[i]->parameter_number; k++)
             {
               cprintf(" %s ", p->systemcalls[i]->arg_type[k]);
-              if (!strncmp(p->systemcalls[i]->arg_type[k], "int*", 4) || !strncmp(p->systemcalls[i]->arg_type[k], "struct stat*", 12))
+              if (!strncmp(p->systemcalls[i]->arg_type[k], "int*", 4) || !strncmp(p->systemcalls[i]->arg_type[k], "struct stat*", 12) || !strncmp(p->systemcalls[i]->arg_type[k], "char**", 6))
               {
-                cprintf(" %s ", si->arg_value[k]->pointer_val[0]);
+                //cprintf(" %s ", si->arg_value[k]->pointer_val[0]);
               }
               else if (!strncmp(p->systemcalls[i]->arg_type[k], "int", 3) || !strncmp(p->systemcalls[i]->arg_type[k], "short", 5) || !strncmp(p->systemcalls[i]->arg_type[k], "fd", 2))
               {
                 cprintf(" %d ", si->arg_value[k]->int_val);
               }
-              // else if (!strncmp(p->systemcalls[i]->arg_type[k], "char*", 5))
-              // {
-              //   cprintf(" %s ", si->arg_value[k]->chars_val[0]);
-              // }
+              else if (!strncmp(p->systemcalls[i]->arg_type[k], "char*", 5))
+              {
+                cprintf(" %s ", si->arg_value[k]->chars_val);
+              }
             }
             cprintf("\n");
             si = si->next;

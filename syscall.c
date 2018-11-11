@@ -266,7 +266,7 @@ void give_systemcall_info(int num, struct systemcall_base_inf *systemcall)
     return;
   case 21:
     systemcall->name = "close\0";
-    systemcall->arg_type[0] = CHARS;
+    systemcall->arg_type[0] = INT;
     systemcall->parameter_number = 1;
     return;
   case 22:
@@ -311,23 +311,51 @@ void save_systemcall_data(struct proc *curproc, int systemcall_number)
   // save systemcalls arguments
   for (int i = 0; i < sbi->parameter_number; i++)
   {
-    struct argumnet_value *av = (struct argumnet_value *)kalloc();
-    av->chars_val = (char *)kalloc();
-    av->pointer_val = (char **)kalloc();
+    new_si->arg_value[i] = (struct argumnet_value *)kalloc();
+    new_si->arg_value[i]->chars_val = (char *)kalloc();
+    new_si->arg_value[i]->pointer_val = (char **)kalloc();
 
     if (!strncmp(sbi->arg_type[i], STRUCTS, 12))
-      argptr(i, av->pointer_val, sizeof(struct stat *));
+      argptr(i, new_si->arg_value[i]->pointer_val, sizeof(struct stat *));
 
     else if (!strncmp(sbi->arg_type[i], INTS, 4))
-      argptr(i, av->pointer_val, sizeof(int *));
+      argptr(i, new_si->arg_value[i]->pointer_val, sizeof(int *));
 
-    if (!strncmp(sbi->arg_type[i], CHARS, 5))
-      argstr(i, &(av->chars_val));
+  	else if(!strncmp(sbi->arg_type[i], CHARSS, 6))
+      argptr(i, new_si->arg_value[i]->pointer_val, sizeof(char **));
+
+    else if (!strncmp(sbi->arg_type[i], CHARS, 5))
+  	{
+      argstr(i, &(new_si->arg_value[i]->chars_val));
+	  // cprintf("\ncahr * value return by argstr:%s\n",new_si->arg_value[i]->chars_val);  		
+  	}
 
     else if (!strncmp(sbi->arg_type[i], INT, 3) || !strncmp(sbi->arg_type[i], SHORT, 5) || !strncmp(sbi->arg_type[i], FD, 2))
-      argint(i, &(av->int_val));
-    new_si->arg_value[i] = av;
+      argint(i, &(new_si->arg_value[i]->int_val));
+
+    // new_si->arg_value[i] = av;
   }
+
+  // for (int i = 0; i < sbi->parameter_number; i++)
+  // {
+
+  //  //  if (!strncmp(sbi->arg_type[i], STRUCTS, 12))
+	 //  // cprintf("\ncahr ** value return by argstr:%s\n",new_si->arg_value[i]->pointer_val[0]);  		
+
+  //   // else if (!strncmp(sbi->arg_type[i], INTS, 4))
+	 //  // cprintf("\nint * value return by argstr:%s\n",new_si->arg_value[i]->chars_val);  		
+
+  // 	// else if(!strncmp(sbi->arg_type[i], CHARSS, 6))
+	 //  // cprintf("\ncahr * value return by argstr:%s\n",new_si->arg_value[i]->chars_val);  		
+
+  //    if (!strncmp(sbi->arg_type[i], CHARS, 5))
+	 //  cprintf("\n pid : %d cahr * :%s\n",curproc->pid, new_si->arg_value[i]->chars_val);  		
+
+  //  //  else if (!strncmp(sbi->arg_type[i], INT, 3) || !strncmp(sbi->arg_type[i], SHORT, 5) || !strncmp(sbi->arg_type[i], FD, 2))
+	 //  // cprintf("\ncahr * value return by argstr:%s\n",new_si->arg_value[i]->chars_val);  		
+
+  //   // new_si->arg_value[i] = av;
+  // }
 
   if (!curproc->systemcalls[systemcall_number])
   {
