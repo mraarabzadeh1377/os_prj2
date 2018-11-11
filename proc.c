@@ -548,7 +548,6 @@ void procdump(void)
 
 void print_systemcall(struct proc *p)
 {
-
 }
 
 int inc_num(int a)
@@ -561,22 +560,40 @@ void invoked_systemcall(int pid)
   struct proc *p;
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     if (p->pid == pid)
-      break;
-
+      goto pri;
+  cprintf("pid not found\n");
+  return;
+pri:
   for (int i = 0; i < 27; ++i)
   {
     if (p->systemcalls[i])
     {
-      cprintf("%s ", p->systemcalls[i]->name);
-      cprintf("%d ", p->systemcalls[i]->number_of_call);
+      cprintf("id: %d \n", p->systemcalls[i]->id);
+      cprintf("name: %s ", p->systemcalls[i]->name);
+      cprintf("call num: %d \n", p->systemcalls[i]->number_of_call);
 
       struct systemcall_instance *si = p->systemcalls[i]->instances;
-
       for (int j = 0; j < p->systemcalls[i]->number_of_call; j++)
       {
-        cprintf("%d ", si->time->year);
+        cprintf(" time: %d/%d/%d  %d:%d:%d \n", si->time->year, si->time->month, si->time->day, si->time->hour, si->time->minute, si->time->second);
+        for (int k = 0; k < p->systemcalls[i]->parameter_number; k++)
+        {
+          cprintf(" %s ", p->systemcalls[i]->arg_type[k]);
+          if (!strncmp(p->systemcalls[i]->arg_type[k], "int*", 4) || !strncmp(p->systemcalls[i]->arg_type[k], "struct stat*", 12))
+          {
+            cprintf(" %s ", si->arg_value[k]->pointer_val[0]);
+          }
+          else if (!strncmp(p->systemcalls[i]->arg_type[k], "int", 3) || !strncmp(p->systemcalls[i]->arg_type[k], "short", 5) || !strncmp(p->systemcalls[i]->arg_type[k], "fd", 2))
+          {
+            cprintf(" %d ", si->arg_value[k]->int_val);
+          }
+          else if (!strncmp(p->systemcalls[i]->arg_type[k], "char*", 5))
+          {
+            cprintf(" %s ", si->arg_value[k]->chars_val);
+          }
+        }
+        cprintf("\n");
         si = si->next;
-        // cprintf("hello ");
       }
       cprintf("\n");
     }
@@ -588,14 +605,14 @@ void sort_systemcall(int pid)
   invoked_systemcall(pid);
 }
 
-void get_count(int pid,int sysnum)
+void get_count(int pid, int sysnum)
 {
   struct proc *p;
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     if (p->pid == pid)
       break;
-  cprintf("proccess id is:%d  systemcall number is:%d  number of use is:%d \n", p->pid, sysnum, 
-                      p->systemcalls[sysnum]->number_of_call);
+  cprintf("proccess id is:%d  systemcall number is:%d  number of use is:%d \n", p->pid, sysnum,
+          p->systemcalls[sysnum]->number_of_call);
 }
 
 void log_systemcall(void)
@@ -604,13 +621,7 @@ void log_systemcall(void)
 
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
 
-    if (p->state != UNUSED && p->state!=EMBRYO)
+    if (p->state != UNUSED && p->state != EMBRYO)
 
       print_systemcall(p);
 }
-//should be complete by hosein
-
-// void print_systemcalls(struct proc *p)
-// {
-
-// }
