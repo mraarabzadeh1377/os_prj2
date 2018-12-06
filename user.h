@@ -31,6 +31,8 @@ void invoked_systemcall(int);
 void sort_sytemcall(int);
 void get_count(int, int);
 void log_systemcall(void);
+void ticketlock_init(void);
+void ticketlock_test(void);
 // ulib.c
 int stat(const char *, struct stat *);
 char *strcpy(char *, const char *);

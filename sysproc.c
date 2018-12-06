@@ -118,12 +118,24 @@ int sys_get_count(void)
     return -1;
   if (argint(1, &sysnum) < 0)
     return -1;
-  get_count(pid,sysnum);
+  get_count(pid, sysnum);
   return 1;
 }
 
 int sys_log_systemcall(void)
 {
   log_systemcall();
+  return 1;
+}
+
+int sys_ticketlock_init(void)
+{
+  ticketlock_init();
+  return 1;
+}
+
+int sys_ticketlock_test(void)
+{
+  ticketlock_test();
   return 1;
 }

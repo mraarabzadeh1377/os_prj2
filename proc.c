@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "ticketlock.h"
 #include "date.h"
 
 struct
@@ -15,6 +16,9 @@ struct
 } ptable;
 
 static struct proc *initproc;
+
+struct ticketlock ticketlockTest;
+int count = 0;
 
 int nextpid = 1;
 extern void forkret(void);
@@ -548,7 +552,7 @@ void procdump(void)
 
 int inc_num(int a)
 {
-  cprintf(" %d ",a+1);
+  cprintf(" %d ", a + 1);
   return a + 1;
 }
 
@@ -575,19 +579,19 @@ pri:
         cprintf(" time: %d/%d/%d  %d:%d:%d \n", si->time->year, si->time->month, si->time->day, si->time->hour, si->time->minute, si->time->second);
         for (int k = 0; k < p->systemcalls[i]->parameter_number; k++)
         {
-           cprintf(" %s ", p->systemcalls[i]->arg_type[k]);
-              if (!strncmp(p->systemcalls[i]->arg_type[k], "int*", 4) || !strncmp(p->systemcalls[i]->arg_type[k], "struct stat*", 12) || !strncmp(p->systemcalls[i]->arg_type[k], "char**", 6))
-              {
-                //cprintf(" %s ", si->arg_value[k]->pointer_val[0]);
-              }
-              else if (!strncmp(p->systemcalls[i]->arg_type[k], "int", 3) || !strncmp(p->systemcalls[i]->arg_type[k], "short", 5) || !strncmp(p->systemcalls[i]->arg_type[k], "fd", 2))
-              {
-                cprintf(" %d ", si->arg_value[k]->int_val);
-              }
-              else if (!strncmp(p->systemcalls[i]->arg_type[k], "char*", 5))
-              {
-                cprintf(" %s ", si->arg_value[k]->chars_val);
-              }
+          cprintf(" %s ", p->systemcalls[i]->arg_type[k]);
+          if (!strncmp(p->systemcalls[i]->arg_type[k], "int*", 4) || !strncmp(p->systemcalls[i]->arg_type[k], "struct stat*", 12) || !strncmp(p->systemcalls[i]->arg_type[k], "char**", 6))
+          {
+            //cprintf(" %s ", si->arg_value[k]->pointer_val[0]);
+          }
+          else if (!strncmp(p->systemcalls[i]->arg_type[k], "int", 3) || !strncmp(p->systemcalls[i]->arg_type[k], "short", 5) || !strncmp(p->systemcalls[i]->arg_type[k], "fd", 2))
+          {
+            cprintf(" %d ", si->arg_value[k]->int_val);
+          }
+          else if (!strncmp(p->systemcalls[i]->arg_type[k], "char*", 5))
+          {
+            cprintf(" %s ", si->arg_value[k]->chars_val);
+          }
         }
         cprintf("\n");
         si = si->next;
@@ -614,13 +618,12 @@ write:
   if (p->systemcalls[sysnum])
   {
     cprintf("proccess id is:%d  systemcall number is:%d  number of use is:%d \n", p->pid, sysnum,
-          p->systemcalls[sysnum]->number_of_call);
+            p->systemcalls[sysnum]->number_of_call);
   }
   else
   {
     cprintf("this systemcall not found for this process\n");
   }
-  
 }
 
 void log_systemcall(void)
@@ -629,7 +632,7 @@ void log_systemcall(void)
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     if (p->state == RUNNING || p->state == SLEEPING)
     {
-      cprintf("process name:%s\n",p->name);
+      cprintf("process name:%s\n", p->name);
       for (int i = 0; i < 27; ++i)
       {
         if (p->systemcalls[i])
@@ -665,4 +668,17 @@ void log_systemcall(void)
         }
       }
     }
+}
+
+void ticketlock_init(void)
+{
+  initTicketlock(&ticketlockTest, "ticketLock test");
+}
+
+void ticketlock_test(void)
+{
+  acquireTicket(&ticketlockTest);
+  count++;
+  cprintf("                 pid: %d   count: %d\n", myproc()->pid, count);
+  releaseTicket(&ticketlockTest);
 }
