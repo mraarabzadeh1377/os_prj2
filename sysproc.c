@@ -139,3 +139,19 @@ int sys_ticketlock_test(void)
   ticketlock_test();
   return 1;
 }
+
+int sys_rwlock_init(void)
+{
+  rwlock_init();
+  return 1;
+}
+
+int sys_rwlock_test(void)
+{
+  int num;
+  if (argint(0, &num) < 0)
+    return -1;
+
+  rwlock_test(num);
+  return 1;
+}

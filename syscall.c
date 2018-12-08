@@ -117,6 +117,8 @@ extern int sys_get_count(void);
 extern int sys_log_systemcall(void);
 extern int sys_ticketlock_init(void);
 extern int sys_ticketlock_test(void);
+extern int sys_rwlock_init(void);
+extern int sys_rwlock_test(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork] sys_fork,
@@ -149,6 +151,8 @@ static int (*syscalls[])(void) = {
 
     [SYS_ticketlock_init] sys_ticketlock_init,
     [SYS_ticketlock_test] sys_ticketlock_test,
+    [SYS_rwlock_init] sys_rwlock_init,
+    [SYS_rwlock_test] sys_rwlock_test,
 };
 //create function for saving systemcall datas
 struct systemcall_info

@@ -8,6 +8,7 @@ struct rtcdate;
 struct spinlock;
 struct sleeplock;
 struct ticketlock;
+struct rwlock;
 struct stat;
 struct superblock;
 
@@ -120,6 +121,7 @@ void sleep(void *, struct spinlock *);
 void userinit(void);
 int wait(void);
 void wakeup(void *);
+void wakeupByPid(void *, int);
 void yield(void);
 int inc_num(int);
 void invoked_systemcall(int);
@@ -128,6 +130,8 @@ void get_count(int, int);
 void log_systemcall(void);
 void ticketlock_init(void);
 void ticketlock_test(void);
+void rwlock_init(void);
+void rwlock_test(int);
 
 // swtch.S
 void swtch(struct context **, struct context *);
@@ -151,6 +155,11 @@ void initsleeplock(struct sleeplock *, char *);
 void acquireTicket(struct ticketlock *);
 void releaseTicket(struct ticketlock *);
 void initTicketlock(struct ticketlock *, char *);
+
+// rwlock.c
+void initRwlock(struct rwlock *, char *);
+void rwWait(struct rwlock *, int);
+void rwSignal(struct rwlock *);
 
 // string.c
 int memcmp(const void *, const void *, uint);

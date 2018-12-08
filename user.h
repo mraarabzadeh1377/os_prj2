@@ -33,6 +33,8 @@ void get_count(int, int);
 void log_systemcall(void);
 void ticketlock_init(void);
 void ticketlock_test(void);
+void rwlock_init(void);
+void rwlock_test(int);
 // ulib.c
 int stat(const char *, struct stat *);
 char *strcpy(char *, const char *);

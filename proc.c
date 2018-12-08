@@ -7,6 +7,7 @@
 #include "proc.h"
 #include "spinlock.h"
 #include "ticketlock.h"
+#include "rwlock.h"
 #include "date.h"
 
 struct
@@ -17,8 +18,13 @@ struct
 
 static struct proc *initproc;
 
+// ticketlock
 struct ticketlock ticketlockTest;
 int count = 0;
+
+// rwlock
+struct rwlock rwlockTest;
+int rwCounter = 0;
 
 int nextpid = 1;
 extern void forkret(void);
@@ -487,6 +493,25 @@ void wakeup(void *chan)
   release(&ptable.lock);
 }
 
+void wakeup2(void *chan, int pid)
+{
+  struct proc *p;
+
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    if (p->state == SLEEPING && p->chan == chan && p->pid == pid)
+    {
+      p->state = RUNNABLE;
+      break;
+    }
+}
+
+void wakeupByPid(void *chan, int pid)
+{
+  acquire(&ptable.lock);
+  wakeup2(chan, pid);
+  release(&ptable.lock);
+}
+
 // Kill the process with the given pid.
 // Process won't exit until it returns
 // to user space (see trap in trap.c).
@@ -679,6 +704,31 @@ void ticketlock_test(void)
 {
   acquireTicket(&ticketlockTest);
   count++;
-  cprintf("                 pid: %d   count: %d\n", myproc()->pid, count);
+  cprintf(" pid: %d   count: %d\n", myproc()->pid, count);
   releaseTicket(&ticketlockTest);
+}
+
+void rwlock_init(void)
+{
+  initRwlock(&rwlockTest, "rwlock test");
+}
+
+void rwlock_test(int mode)
+{
+  cprintf("begin pid: %d   \n", myproc()->pid);
+
+  rwWait(&rwlockTest, mode);
+  if (!mode)
+  {
+    // cprintf("reading => pid: %d   counter: %d \n", myproc()->pid, rwCounter);
+  }
+  else
+  {
+    // cprintf("writing => pid: %d   counter: %d \n", myproc()->pid, rwCounter);
+    rwCounter++;
+  }
+  for (int i = 0; i < 2000000000; i++)
+    ;
+  rwSignal(&rwlockTest);
+  // cprintf("finish pid: %d   \n", myproc()->pid);
 }

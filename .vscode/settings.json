@@ -5,6 +5,10 @@
         "fcntl.h": "c",
         "stat.h": "c",
         "user.h": "c",
-        "param.h": "c"
+        "param.h": "c",
+        "ticketlock.h": "c",
+        "spinlock.h": "c",
+        "proc.h": "c",
+        "rwlock.h": "c"
     }
 }
