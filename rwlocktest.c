@@ -17,7 +17,7 @@ int determineSize(int *num)
         position++;
         count *= 2;
     }
-    *num -= count;
+    *num -= count / 2;
     return position;
 }
 
