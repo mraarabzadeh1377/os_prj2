@@ -65,6 +65,7 @@ void rwWait(struct rwlock *lk, int isWriter)
     {
         addToWriteQueue(lk);
         lk->writeQueueSize++;
+        cprintf("   writequeue : %d  \n", lk->writeQueueSize);
 
         if (lk->mode == EMPTY)
             lk->mode = WRITING;
@@ -82,7 +83,7 @@ void rwWait(struct rwlock *lk, int isWriter)
             sleep(lk, &lk->lk);
     }
 
-    cprintf("\n   lock mode  : %s  \n", !lk->mode ? "empty" : (lk->mode == 1) ? "writing" : "reading");
+    cprintf("   lock mode  : %s  \n", !lk->mode ? "empty" : (lk->mode == 1) ? "writing" : "reading");
     cprintf("   readqueue : %d  \n", lk->readQueueSize);
     cprintf("   writequeue : %d  \n", lk->writeQueueSize);
     cprintf("   mode : %s  \n", isWriter ? "writing" : "reading");

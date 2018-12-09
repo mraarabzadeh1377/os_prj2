@@ -472,11 +472,29 @@ void sleep(void *chan, struct spinlock *lk)
   }
 }
 
+void ticketlockSleep(void *chan)
+{
+  struct proc *p = myproc();
+
+  if (p == 0)
+    panic("sleep");
+
+  acquire(&ptable.lock);
+
+  p->chan = chan;
+  p->state = SLEEPING;
+
+  sched();
+
+  // Tidy up.
+  p->chan = 0;
+  release(&ptable.lock);
+}
+
 //PAGEBREAK!
 // Wake up all processes sleeping on chan.
 // The ptable lock must be held.
-static void
-wakeup1(void *chan)
+static void wakeup1(void *chan)
 {
   struct proc *p;
 
@@ -700,9 +718,29 @@ void ticketlock_init(void)
   initTicketlock(&ticketlockTest, "ticketLock test");
 }
 
+void delay(int amount)
+{
+  uint initial_ticks, current_ticks;
+
+  acquire(&tickslock);
+  initial_ticks = ticks;
+  release(&tickslock);
+
+  while (1)
+  {
+    acquire(&tickslock);
+    current_ticks = ticks;
+    release(&tickslock);
+
+    if (current_ticks - initial_ticks > amount)
+      break;
+  }
+}
+
 void ticketlock_test(void)
 {
   acquireTicket(&ticketlockTest);
+  delay(100);
   count++;
   cprintf(" pid: %d   count: %d\n", myproc()->pid, count);
   releaseTicket(&ticketlockTest);
@@ -715,20 +753,16 @@ void rwlock_init(void)
 
 void rwlock_test(int mode)
 {
-  cprintf("begin pid: %d   \n", myproc()->pid);
-
   rwWait(&rwlockTest, mode);
+  delay(80);
   if (!mode)
   {
-    // cprintf("reading => pid: %d   counter: %d \n", myproc()->pid, rwCounter);
+    cprintf("reading => pid: %d   counter: %d \n", myproc()->pid, rwCounter);
   }
   else
   {
-    // cprintf("writing => pid: %d   counter: %d \n", myproc()->pid, rwCounter);
+    cprintf("writing => pid: %d   counter: %d \n", myproc()->pid, rwCounter);
     rwCounter++;
   }
-  for (int i = 0; i < 2000000000; i++)
-    ;
   rwSignal(&rwlockTest);
-  // cprintf("finish pid: %d   \n", myproc()->pid);
 }
